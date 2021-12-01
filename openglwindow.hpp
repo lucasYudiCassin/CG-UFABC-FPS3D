@@ -28,21 +28,12 @@ class OpenGLWindow : public abcg::OpenGLWindow {
   bool m_relativeMouse{true};
   abcg::ElapsedTimer m_mouseTimer{};
 
-  // glm::mat4 m_modelMatrix{1.0f};
-  glm::mat4 m_viewMatrix{1.0f};
-  glm::mat4 m_projMatrix{1.0f};
-
   // Shaders
-  // std::vector<const char*> m_shaderNames{
-  //     "normalmapping", "texture", "blinnphong", "phong",
-  //     "gouraud",       "normal",  "depth"};
-  // std::vector<GLuint> m_programs;
   GLuint m_program{};
-  // int m_currentProgramIndex{};
 
   // Mapping mode
   // 0: triplanar; 1: cylindrical; 2: spherical; 3: from mesh
-  int m_mappingMode{};
+  // int m_mappingMode{};
 
   // Light and material properties
   glm::vec4 m_lightDir{-1.0f, -1.0f, -1.0f, 0.0f};

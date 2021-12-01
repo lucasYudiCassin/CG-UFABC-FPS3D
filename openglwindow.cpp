@@ -83,7 +83,6 @@ void OpenGLWindow::initializeGL() {
   m_pistolModel.loadModel(m_program, getAssetsPath() + "pistol.obj",
                           getAssetsPath() + "maps/pistol_difusse.jpg",
                           getAssetsPath() + "maps/pistol_normal.jpg");
-  m_mappingMode = 3;  // "From mesh" option
 
   // Initialize camera
   m_camera.initializeCamera();
@@ -123,8 +122,6 @@ void OpenGLWindow::render(glm::mat4 modelMatrix, Model model) {
   const GLint KsLoc{abcg::glGetUniformLocation(program, "Ks")};
   const GLint diffuseTexLoc{abcg::glGetUniformLocation(program, "diffuseTex")};
   const GLint normalTexLoc{abcg::glGetUniformLocation(program, "normalTex")};
-  const GLint mappingModeLoc{
-      abcg::glGetUniformLocation(program, "mappingMode")};
 
   // Set uniform variables used by every scene object
   abcg::glUniformMatrix4fv(viewMatrixLoc, 1, GL_FALSE,
@@ -133,7 +130,6 @@ void OpenGLWindow::render(glm::mat4 modelMatrix, Model model) {
                            &m_camera.m_projMatrix[0][0]);
   abcg::glUniform1i(diffuseTexLoc, 0);
   abcg::glUniform1i(normalTexLoc, 1);
-  abcg::glUniform1i(mappingModeLoc, m_mappingMode);
 
   // const auto lightDirRotated{m_lightDir};
   abcg::glUniform4fv(lightDirLoc, 1, &m_lightDir.x);
@@ -167,61 +163,6 @@ void OpenGLWindow::paintGL() {
 
   abcg::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   abcg::glViewport(0, 0, m_viewportWidth, m_viewportHeight);
-
-  // // Use currently selected program
-  // // const auto program{m_programs.at(m_currentProgramIndex)};
-  // const auto program{m_program};
-  // abcg::glUseProgram(program);
-
-  // // Get location of uniform variables
-  // const GLint viewMatrixLoc{abcg::glGetUniformLocation(program,
-  // "viewMatrix")}; const GLint
-  // projMatrixLoc{abcg::glGetUniformLocation(program, "projMatrix")}; const
-  // GLint modelMatrixLoc{
-  //     abcg::glGetUniformLocation(program, "modelMatrix")};
-  // const GLint normalMatrixLoc{
-  //     abcg::glGetUniformLocation(program, "normalMatrix")};
-  // const GLint lightDirLoc{
-  //     abcg::glGetUniformLocation(program, "lightDirWorldSpace")};
-  // const GLint shininessLoc{abcg::glGetUniformLocation(program, "shininess")};
-  // const GLint IaLoc{abcg::glGetUniformLocation(program, "Ia")};
-  // const GLint IdLoc{abcg::glGetUniformLocation(program, "Id")};
-  // const GLint IsLoc{abcg::glGetUniformLocation(program, "Is")};
-  // const GLint KaLoc{abcg::glGetUniformLocation(program, "Ka")};
-  // const GLint KdLoc{abcg::glGetUniformLocation(program, "Kd")};
-  // const GLint KsLoc{abcg::glGetUniformLocation(program, "Ks")};
-  // const GLint diffuseTexLoc{abcg::glGetUniformLocation(program,
-  // "diffuseTex")}; const GLint
-  // normalTexLoc{abcg::glGetUniformLocation(program, "normalTex")}; const GLint
-  // mappingModeLoc{
-  //     abcg::glGetUniformLocation(program, "mappingMode")};
-
-  // // Set uniform variables used by every scene object
-  // abcg::glUniformMatrix4fv(viewMatrixLoc, 1, GL_FALSE, &m_viewMatrix[0][0]);
-  // abcg::glUniformMatrix4fv(projMatrixLoc, 1, GL_FALSE, &m_projMatrix[0][0]);
-  // abcg::glUniform1i(diffuseTexLoc, 0);
-  // abcg::glUniform1i(normalTexLoc, 1);
-  // abcg::glUniform1i(mappingModeLoc, m_mappingMode);
-
-  // // const auto lightDirRotated{m_lightDir};
-  // abcg::glUniform4fv(lightDirLoc, 1, &m_lightDir.x);
-  // abcg::glUniform4fv(IaLoc, 1, &m_Ia.x);
-  // abcg::glUniform4fv(IdLoc, 1, &m_Id.x);
-  // abcg::glUniform4fv(IsLoc, 1, &m_Is.x);
-
-  // // Set uniform variables of the current object
-  // abcg::glUniformMatrix4fv(modelMatrixLoc, 1, GL_FALSE,
-  // &m_modelMatrix[0][0]);
-
-  // const auto modelViewMatrix{glm::mat3(m_viewMatrix * m_modelMatrix)};
-  // glm::mat3 normalMatrix{glm::inverseTranspose(modelViewMatrix)};
-  // abcg::glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE,
-  // &normalMatrix[0][0]);
-
-  // abcg::glUniform1f(shininessLoc, m_shininess);
-  // abcg::glUniform4fv(KaLoc, 1, &m_Ka.x);
-  // abcg::glUniform4fv(KdLoc, 1, &m_Kd.x);
-  // abcg::glUniform4fv(KsLoc, 1, &m_Ks.x);
 
   // RENDER ROOM
   glm::mat4 modelMatrix{1.0f};
@@ -260,49 +201,7 @@ void OpenGLWindow::paintGL() {
   render(modelMatrix, m_pistolModel);
 }
 
-void OpenGLWindow::paintUI() {
-  abcg::OpenGLWindow::paintUI();
-
-  // Create window for light sources
-  abcg::glDisable(GL_CULL_FACE);
-  abcg::glFrontFace(GL_CCW);
-  const auto aspect{static_cast<float>(m_viewportWidth) /
-                    static_cast<float>(m_viewportHeight)};
-
-  m_projMatrix = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 5.0f);
-  const auto widgetSize{ImVec2(222, 244)};
-  ImGui::SetNextWindowPos(ImVec2(m_viewportWidth - widgetSize.x - 5,
-                                 m_viewportHeight - widgetSize.y - 5));
-  ImGui::SetNextWindowSize(widgetSize);
-  ImGui::Begin(" ", nullptr, ImGuiWindowFlags_NoDecoration);
-
-  ImGui::Text("Light properties");
-
-  // Slider to control light properties
-  ImGui::PushItemWidth(widgetSize.x - 36);
-  ImGui::ColorEdit3("Ia", &m_Ia.x, ImGuiColorEditFlags_Float);
-  ImGui::ColorEdit3("Id", &m_Id.x, ImGuiColorEditFlags_Float);
-  ImGui::ColorEdit3("Is", &m_Is.x, ImGuiColorEditFlags_Float);
-  ImGui::PopItemWidth();
-
-  ImGui::Spacing();
-
-  ImGui::Text("Material properties");
-
-  // Slider to control material properties
-  ImGui::PushItemWidth(widgetSize.x - 36);
-  ImGui::ColorEdit3("Ka", &m_Ka.x, ImGuiColorEditFlags_Float);
-  ImGui::ColorEdit3("Kd", &m_Kd.x, ImGuiColorEditFlags_Float);
-  ImGui::ColorEdit3("Ks", &m_Ks.x, ImGuiColorEditFlags_Float);
-  ImGui::PopItemWidth();
-
-  // Slider to control the specular shininess
-  ImGui::PushItemWidth(widgetSize.x - 16);
-  ImGui::SliderFloat("", &m_shininess, 0.0f, 500.0f, "shininess: %.1f");
-  ImGui::PopItemWidth();
-
-  ImGui::End();
-}
+void OpenGLWindow::paintUI() { abcg::OpenGLWindow::paintUI(); }
 
 void OpenGLWindow::resizeGL(int width, int height) {
   m_viewportWidth = width;
@@ -329,10 +228,6 @@ void OpenGLWindow::update() {
   glm::vec2 rotationSpeed = getMouseRotationSpeed();
   m_camera.pan(rotationSpeed.x * deltaTime);
   m_camera.tilt(rotationSpeed.y * deltaTime);
-
-  m_viewMatrix =
-      glm::lookAt(glm::vec3(0.0f, 0.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f),
-                  glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
 glm::vec2 OpenGLWindow::getMouseRotationSpeed() {

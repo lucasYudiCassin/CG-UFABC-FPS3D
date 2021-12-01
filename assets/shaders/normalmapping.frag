@@ -24,10 +24,6 @@ uniform sampler2D diffuseTex;
 // Normal map sampler
 uniform sampler2D normalTex;
 
-// Mapping mode
-// 0: triplanar; 1: cylindrical; 2: spherical; 3: from mesh
-uniform int mappingMode;
-
 out vec4 outColor;
 
 // Compute matrix to transform from camera space to tangent space
