@@ -3,7 +3,11 @@
 #include <imgui.h>
 
 #include <cppitertools/itertools.hpp>
+#include <glm/fwd.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
+
+#include "camera.hpp"
+#include "core.h"
 
 void OpenGLWindow::handleEvent(SDL_Event& event) {
   glm::ivec2 mousePosition;
@@ -84,13 +88,15 @@ void OpenGLWindow::initializeGL() {
                           getAssetsPath() + "maps/pistol_difusse.jpg",
                           getAssetsPath() + "maps/pistol_normal.jpg");
 
+  m_targetModel.loadModel(m_program, getAssetsPath() + "target.obj",
+                          getAssetsPath() + "maps/room_difusse.jpg",
+                          getAssetsPath() + "maps/room_normal.jpg");
+
   // Initialize camera
   m_camera.initializeCamera();
 }
 
-void OpenGLWindow::restart() {
-  m_gameData.m_state = State::Playing;
-}
+void OpenGLWindow::restart() { m_gameData.m_state = State::Playing; }
 
 // void OpenGLWindow::loadModel(std::string_view path) {
 //   m_model.terminateGL();
@@ -203,6 +209,14 @@ void OpenGLWindow::paintGL() {
                             glm::vec3{0.0f, 0.0f, 1.0f});
 
   render(modelMatrix, m_pistolModel);
+
+  // glm::mat4 modelMatrix{1.0f};
+  modelMatrix = glm::mat4{1.0f};
+  m_targetPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+  modelMatrix = glm::translate(modelMatrix, m_targetPosition);
+  modelMatrix = glm::scale(modelMatrix, glm::vec3{m_targetScale});
+
+  render(modelMatrix, m_targetModel);
 }
 
 void OpenGLWindow::paintUI() { abcg::OpenGLWindow::paintUI(); }

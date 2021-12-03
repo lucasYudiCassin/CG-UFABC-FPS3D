@@ -1,6 +1,8 @@
 #ifndef OPENGLWINDOW_HPP_
 #define OPENGLWINDOW_HPP_
 
+#include <glm/fwd.hpp>
+
 #include "abcg.hpp"
 #include "camera.hpp"
 #include "gamedata.hpp"
@@ -23,6 +25,13 @@ class OpenGLWindow : public abcg::OpenGLWindow {
 
   Model m_model;
   Model m_pistolModel;
+  Model m_targetModel;
+
+  float m_targetXAxis = {0.0f};
+  glm::vec3 m_targetPosition{0.0f};
+  float m_targetScale{0.15f};
+  float m_targetOriginalRadius{10.0f};
+  float m_targetRadius{m_targetScale * m_targetOriginalRadius};
 
   Camera m_camera;
   float m_dollySpeed{0.0f};
