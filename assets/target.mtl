@@ -1,0 +1,16 @@
+# Blender MTL File: 'ROOM.blend'
+# Material Count: 1
+
+newmtl target
+  Ns 225.000000
+  Ni 1.450000
+  Tr 0.0000
+  Tf 1.00 1.00 1.00
+  illum 2
+  Ka 1.000000 1.000000 1.000000
+  Kd 0.000000 0.005443 0.800000
+  Ks 0.500000 0.500000 0.500000
+  Ke 0.000000 0.000000 0.000000
+  d 1.000000
+
+map_Kd maps/room_diffuse.jpg
