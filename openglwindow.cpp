@@ -232,6 +232,15 @@ void OpenGLWindow::update() {
   glm::vec2 rotationSpeed = getMouseRotationSpeed();
   m_camera.pan(rotationSpeed.x * deltaTime);
   m_camera.tilt(rotationSpeed.y * deltaTime);
+
+  auto atMinusCamera = m_camera.m_at - m_camera.m_eye;
+  auto distance = glm::distance(glm::cross(m_targetPosition - m_camera.m_eye,
+                                           m_targetPosition - m_camera.m_at),
+                                glm::vec3{0.0f}) /
+                  glm::distance(atMinusCamera, glm::vec3{0.0f});
+  // auto distance = glm::cross(m_targetPosition - m_camera.m_eye,
+  // m_targetPosition - m_camera.m_at) / atMinusCamera;
+  fmt::print("distance = {}", distance);
 }
 
 glm::vec2 OpenGLWindow::getMouseRotationSpeed() {
