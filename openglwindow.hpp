@@ -3,6 +3,7 @@
 
 #include "abcg.hpp"
 #include "camera.hpp"
+#include "gamedata.hpp"
 #include "model.hpp"
 
 class OpenGLWindow : public abcg::OpenGLWindow {
@@ -17,6 +18,8 @@ class OpenGLWindow : public abcg::OpenGLWindow {
  private:
   int m_viewportWidth{};
   int m_viewportHeight{};
+
+  GameData m_gameData;
 
   Model m_model;
   Model m_pistolModel;
@@ -49,6 +52,8 @@ class OpenGLWindow : public abcg::OpenGLWindow {
   void update();
   glm::vec2 getMouseRotationSpeed();
   void render(glm::mat4 modelMatrix, Model model);
+
+  void restart();
 };
 
 #endif

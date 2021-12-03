@@ -88,6 +88,10 @@ void OpenGLWindow::initializeGL() {
   m_camera.initializeCamera();
 }
 
+void OpenGLWindow::restart() {
+  m_gameData.m_state = State::Playing;
+}
+
 // void OpenGLWindow::loadModel(std::string_view path) {
 //   m_model.terminateGL();
 //   m_model.loadDiffuseTexture(getAssetsPath() +
