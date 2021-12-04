@@ -4,7 +4,12 @@
 
 #include "core.h"
 
-void Camera::initializeCamera() { m_maxDepth = 1500; }
+void Camera::initializeCamera() {
+  m_maxDepth = 1500;
+  m_viewMatrix =
+      glm::lookAt(glm::vec3(0.0f, 0.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f),
+                  glm::vec3(0.0f, 1.0f, 0.0f));
+}
 
 void Camera::computeProjectionMatrix(int width, int height) {
   m_projMatrix = glm::mat4(1.0f);

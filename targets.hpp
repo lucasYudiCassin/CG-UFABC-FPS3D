@@ -12,7 +12,7 @@ class OpenGLWindow;
 
 class Targets {
  public:
-  void initializeCamera();
+  void initializeTarget();
 
   void computeViewMatrix();
   void computeProjectionMatrix(int width, int height);
@@ -34,6 +34,10 @@ class Targets {
   } __attribute__((aligned(32)));
 
   std::list<Target> m_targets;
+  struct TargetPositions {
+    glm::vec3 m_position;
+    bool m_isDraw;
+  } __attribute__((aligned(32)));
 
   std::array<glm::vec3, 9> allowedTranslations{
       glm::vec3{0.0f, 0.3f, 0.3f}, glm::vec3{0.0f, 0.6f, 0.3f},
@@ -43,7 +47,7 @@ class Targets {
       glm::vec3{0.0f, 0.9f, 0.9f},
   };
 
-  
+  std::list<TargetPositions> m_targetsArray;
 
   std::default_random_engine m_randomEngine;
   std::uniform_real_distribution<float> m_randomDist{-1.0f, 1.0f};

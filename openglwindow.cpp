@@ -14,17 +14,17 @@ void OpenGLWindow::handleEvent(SDL_Event& event) {
   SDL_GetMouseState(&mousePosition.x, &mousePosition.y);
 
   if (event.type == SDL_KEYDOWN) {
-    if (event.key.keysym.sym == SDLK_UP || event.key.keysym.sym == SDLK_w)
-      m_dollySpeed = 1.0f;
+    // if (event.key.keysym.sym == SDLK_UP || event.key.keysym.sym == SDLK_w)
+    //   m_dollySpeed = 0.6f;
 
-    if (event.key.keysym.sym == SDLK_DOWN || event.key.keysym.sym == SDLK_s)
-      m_dollySpeed = -1.0f;
+    // if (event.key.keysym.sym == SDLK_DOWN || event.key.keysym.sym == SDLK_s)
+    //   m_dollySpeed = -0.6f;
 
-    if (event.key.keysym.sym == SDLK_LEFT || event.key.keysym.sym == SDLK_a)
-      m_truckSpeed = -1.0f;
+    // if (event.key.keysym.sym == SDLK_LEFT || event.key.keysym.sym == SDLK_a)
+    //   m_truckSpeed = -0.6f;
 
-    if (event.key.keysym.sym == SDLK_RIGHT || event.key.keysym.sym == SDLK_d)
-      m_truckSpeed = 1.0f;
+    // if (event.key.keysym.sym == SDLK_RIGHT || event.key.keysym.sym == SDLK_d)
+    //   m_truckSpeed = 0.6f;
 
     if (event.key.keysym.sym == SDLK_ESCAPE) {
       SDL_SetRelativeMouseMode(SDL_FALSE);
@@ -33,22 +33,25 @@ void OpenGLWindow::handleEvent(SDL_Event& event) {
   }
 
   if (event.type == SDL_KEYUP) {
-    if ((event.key.keysym.sym == SDLK_UP || event.key.keysym.sym == SDLK_w) &&
-        m_dollySpeed > 0)
-      m_dollySpeed = 0.0f;
+    // if ((event.key.keysym.sym == SDLK_UP || event.key.keysym.sym == SDLK_w)
+    // &&
+    //     m_dollySpeed > 0)
+    //   m_dollySpeed = 0.0f;
 
-    if ((event.key.keysym.sym == SDLK_DOWN || event.key.keysym.sym == SDLK_s) &&
-        m_dollySpeed < 0)
-      m_dollySpeed = 0.0f;
+    // if ((event.key.keysym.sym == SDLK_DOWN || event.key.keysym.sym == SDLK_s)
+    // &&
+    //     m_dollySpeed < 0)
+    //   m_dollySpeed = 0.0f;
 
-    if ((event.key.keysym.sym == SDLK_LEFT || event.key.keysym.sym == SDLK_a) &&
-        m_truckSpeed < 0)
-      m_truckSpeed = 0.0f;
+    // if ((event.key.keysym.sym == SDLK_LEFT || event.key.keysym.sym == SDLK_a)
+    // &&
+    //     m_truckSpeed < 0)
+    //   m_truckSpeed = 0.0f;
 
-    if ((event.key.keysym.sym == SDLK_RIGHT ||
-         event.key.keysym.sym == SDLK_d) &&
-        m_truckSpeed > 0)
-      m_truckSpeed = 0.0f;
+    // if ((event.key.keysym.sym == SDLK_RIGHT ||
+    //      event.key.keysym.sym == SDLK_d) &&
+    //     m_truckSpeed > 0)
+    //   m_truckSpeed = 0.0f;
   }
 
   if (event.type == SDL_MOUSEBUTTONDOWN) {
@@ -80,9 +83,6 @@ void OpenGLWindow::initializeGL() {
 
   // Load default model
   // loadModel(getAssetsPath() + "roman_lamp.obj");
-  m_model.loadModel(m_program, getAssetsPath() + "roman_lamp.obj",
-                    getAssetsPath() + "maps/roman_lamp_diffuse.png",
-                    getAssetsPath() + "maps/roman_lamp_normal.png");
 
   m_pistolModel.loadModel(m_program, getAssetsPath() + "pistol.obj",
                           getAssetsPath() + "maps/pistol_difusse.jpg",
@@ -92,24 +92,16 @@ void OpenGLWindow::initializeGL() {
                           getAssetsPath() + "maps/room_difusse.jpg",
                           getAssetsPath() + "maps/room_normal.jpg");
 
+  m_roomModel.loadModel(m_program, getAssetsPath() + "room.obj",
+                        getAssetsPath() + "maps/room_difusse_gloss.jpg",
+                        getAssetsPath() + "maps/room_normal.jpg");
+
   // Initialize camera
   m_camera.initializeCamera();
 }
 
 void OpenGLWindow::restart() { m_gameData.m_state = State::Playing; }
 
-// void OpenGLWindow::loadModel(std::string_view path) {
-//   m_model.terminateGL();
-//   m_model.loadDiffuseTexture(getAssetsPath() +
-//   "maps/roman_lamp_diffuse.png"); m_model.loadNormalTexture(getAssetsPath() +
-//   "maps/roman_lamp_normal.png"); m_model.loadObj(path);
-//   m_model.setupVAO(m_programs.at(m_currentProgramIndex));
-//   // Use material properties from the loaded model
-//   m_Ka = m_model.getKa();
-//   m_Kd = m_model.getKd();
-//   m_Ks = m_model.getKs();
-//   m_shininess = m_model.getShininess();
-// }
 void OpenGLWindow::render(glm::mat4 modelMatrix, Model model) {
   const auto program{m_program};
   abcg::glUseProgram(program);
@@ -176,8 +168,7 @@ void OpenGLWindow::paintGL() {
 
   // RENDER ROOM
   glm::mat4 modelMatrix{1.0f};
-
-  render(modelMatrix, m_model);
+  glm::mat4 roomModelMatrix{1.0f};
 
   // RENDER WEAPON
   // glm::mat4 modelMatrix{1.0f};
@@ -212,11 +203,24 @@ void OpenGLWindow::paintGL() {
 
   // glm::mat4 modelMatrix{1.0f};
   modelMatrix = glm::mat4{1.0f};
-  m_targetPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+  m_targetPosition = glm::vec3(0.0f, 0.0f, 0.5f);
   modelMatrix = glm::translate(modelMatrix, m_targetPosition);
   modelMatrix = glm::scale(modelMatrix, glm::vec3{m_targetScale});
 
   render(modelMatrix, m_targetModel);
+
+  // Rotation angle
+  const auto angle = glm::radians(-90.0f);
+  glm::mat4 scalingMatrix =
+      glm::scale(glm::mat4(1.0f), glm::vec3(2.0f, 1.0f, 2.0f));
+  glm::mat4 translateMatrix =
+      glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 1.7f));
+  glm::mat4 rotateMatrix =
+      glm::rotate(glm::mat4(1.0f), angle, {0.0f, 1.0f, 0.0f});
+
+  roomModelMatrix = translateMatrix * rotateMatrix * scalingMatrix;
+
+  render(roomModelMatrix, m_roomModel);
 }
 
 void OpenGLWindow::paintUI() { abcg::OpenGLWindow::paintUI(); }
@@ -229,7 +233,9 @@ void OpenGLWindow::resizeGL(int width, int height) {
 }
 
 void OpenGLWindow::terminateGL() {
-  m_model.terminateGL();
+  m_roomModel.terminateGL();
+  m_pistolModel.terminateGL();
+  m_targetModel.terminateGL();
   // for (const auto& program : m_programs) {
   //   abcg::glDeleteProgram(program);
   // }
@@ -262,7 +268,7 @@ glm::vec2 OpenGLWindow::getMouseRotationSpeed() {
     SDL_WarpMouseInWindow(nullptr, m_viewportWidth / 2, m_viewportHeight / 2);
   }
 
-  float speedScale{5.0f};
+  float speedScale{2.0f};
 
   glm::vec2 mouseMovement{m_mouseMovement.x, -m_mouseMovement.y};
 

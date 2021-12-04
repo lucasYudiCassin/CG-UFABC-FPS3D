@@ -1,17 +1,18 @@
 #include "targets.hpp"
 
+#include < chrono >
 #include <glm/fwd.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "core.h"
 
-void Targets::initializeTargets() {
+void Targets::initializeTarget() {
   // Start pseudo-random number generator
   m_randomEngine.seed(
       std::chrono::steady_clock::now().time_since_epoch().count());
 
-  // Create asteroids
   m_targets.clear();
+  m_targetsArray = {{.m_position = {0.0f, 0.0f, 0.5f}, .m_isDraw = false}};
 };
 
 void Targets::targetAddedEvent(Targets::Target target) {
