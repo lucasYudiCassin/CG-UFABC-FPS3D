@@ -23,9 +23,9 @@ class OpenGLWindow : public abcg::OpenGLWindow {
 
   GameData m_gameData;
 
-  Model m_model;
   Model m_pistolModel;
   Model m_targetModel;
+  Model m_roomModel;
 
   float m_targetXAxis = {0.0f};
   glm::vec3 m_targetPosition{0.0f};

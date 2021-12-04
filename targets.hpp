@@ -15,7 +15,7 @@ class OpenGLWindow;
 
 class Targets {
  public:
-  void initializeCamera();
+  void initializeTarget();
 
   void computeViewMatrix();
   void computeProjectionMatrix(int width, int height);
