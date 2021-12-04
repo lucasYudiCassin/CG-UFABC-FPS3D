@@ -9,8 +9,7 @@ int main(int argc, char **argv) {
 
     auto window{std::make_unique<OpenGLWindow>()};
     window->setOpenGLSettings({.samples = 0});
-    window->setWindowSettings(
-        {.width = 600, .height = 600, .title = "Model Viewer (version 5)"});
+    window->setWindowSettings({.width = 600, .height = 600, .title = "FPS 3D"});
 
     app.run(std::move(window));
   } catch (const abcg::Exception &exception) {
