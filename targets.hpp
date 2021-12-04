@@ -14,21 +14,8 @@
 class OpenGLWindow;
 
 class Targets {
- public:
-  void initializeTarget();
-
-  void computeViewMatrix();
-  void computeProjectionMatrix(int width, int height);
-
-  void dolly(float speed);
-  void truck(float speed);
-  void pan(float speed);
-  void tilt(float speed);
-
  private:
   friend OpenGLWindow;
-
-  double timeElapsed;
 
   struct Target {
     int m_position;
@@ -36,22 +23,26 @@ class Targets {
 
   std::list<int> m_targets{};
 
-  const std::array<glm::vec3, 9> allowedTranslations{
-      glm::vec3{0.3f, 0.3f, 0.0f}, glm::vec3{0.3f, 0.6f, 0.0f},
-      glm::vec3{0.3f, 0.9f, 0.0f}, glm::vec3{0.6f, 0.3f, 0.0f},
-      glm::vec3{0.6f, 0.6f, 0.0f}, glm::vec3{0.6f, 0.9f, 0.0f},
-      glm::vec3{0.9f, 0.3f, 0.0f}, glm::vec3{0.9f, 0.6f, 0.0f},
-      glm::vec3{0.9f, 0.9f, 0.0f},
+  static const int TARGETS_QUANTITY = 15;
+
+  const std::array<glm::vec3, TARGETS_QUANTITY> allowedTranslations{
+      glm::vec3{-0.4f, 0.2f, 0.5f},  glm::vec3{-0.2f, 0.2f, 0.5f},
+      glm::vec3{0.0f, 0.2f, 0.5f},   glm::vec3{0.2f, 0.2f, 0.5f},
+      glm::vec3{0.4f, 0.2f, 0.5f},   glm::vec3{-0.4f, 0.0f, 0.5f},
+      glm::vec3{-0.2f, 0.0f, 0.5f},  glm::vec3{0.0f, 0.0f, 0.5f},
+      glm::vec3{0.2f, 0.0f, 0.5f},   glm::vec3{0.4f, 0.0f, 0.5f},
+      glm::vec3{-0.4f, -0.2f, 0.5f}, glm::vec3{-0.2f, -0.2f, 0.5f},
+      glm::vec3{0.0f, -0.2f, 0.5f},  glm::vec3{0.2f, -0.2f, 0.5f},
+      glm::vec3{0.4f, -0.2f, 0.5f},
   };
 
   std::default_random_engine m_randomEngine;
-  std::uniform_int_distribution<int> m_randomDist{0, 8};
+  std::uniform_int_distribution<int> m_randomDist{0, TARGETS_QUANTITY - 1};
 
-  const int SIMULTANEOUS_TARGETS = 4;
+  static const int SIMULTANEOUS_TARGETS = 4;
 
   void restart();
-  static Targets::Target createTargetEvent();
-  void addTarget();
+  void addTarget(int exclude = -1);
   void removeTarget(int position);
 };
 

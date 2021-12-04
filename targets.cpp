@@ -17,31 +17,27 @@ void Targets::restart() {
   addTarget();
 }
 
-void Targets::addTarget() {
-  int i = 0;
-  while (i < SIMULTANEOUS_TARGETS) {
+void Targets::addTarget(int exclude) {
+  while (m_targets.size() < SIMULTANEOUS_TARGETS) {
     // generate random position and add to m_targets.
     const int position = m_randomDist(m_randomEngine);
-    // std::list<int> positions;
+    auto positionIsFilled = std::find(m_targets.begin(), m_targets.end(),
+                                      position) != m_targets.end();
 
-    // std::transform(m_targets.begin(), m_targets.end(),
-    //                std::back_inserter(positions),
-    //                [](Target target) { return target.m_position; });
+    if (position == exclude || positionIsFilled) {
+      // fmt::print("not inserted {}\n", position);
+      continue;
+    }
 
-    // auto positionIsFilled = std::find(positions.cbegin(), positions.cend(),
-    //                                   position) != positions.cend();
+    // fmt::print("inserted {}\n", position);
+    // fmt::print("positions = {}\n", m_targets.size());
+    // fmt::print("positionIsFilled = {}\n", positionIsFilled);
 
-    // auto positionIsFilled = std::find(m_targets.begin(), m_targets.end(),
-    //                                   position) != m_targets.end();
-
-    // if (positionIsFilled) {
     m_targets.push_back(position);
-    // }
-    i++;
   }
 }
 
 void Targets::removeTarget(int position) {
   m_targets.remove(position);
-  addTarget();
+  addTarget(position);
 }
