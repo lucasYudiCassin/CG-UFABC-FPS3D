@@ -1556,7 +1556,7 @@ vn -0.0759 0.6326 -0.7708
 vn -0.0624 -0.7715 -0.6332
 vn -0.0866 0.4696 -0.8786
 # g Esfera_UV_Esfera_UV_Target_texture
-usemtl Target_texture
+usemtl target
 # s off
 f 6/1/1 5/2/1 15/3/1 16/4/1
 f 480/5/2 10/6/2 23/7/2 24/8/2

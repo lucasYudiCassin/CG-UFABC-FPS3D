@@ -1,7 +1,7 @@
 # Blender MTL File: 'ROOM.blend'
 # Material Count: 1
 
-newmtl Room2_texture
+newmtl room
 	Ns 225.000000
 	Ni 1.5000
 	Tr 0.0000

@@ -1,7 +1,7 @@
 # Blender v2.93.6 OBJ File: 'ROOM.blend'
 # www.blender.org
 mtllib target.mtl
-o Esfera_UV.001
+# o Esfera_UV.001
 v 979.250427 55.787895 -1184.761353
 v 979.250427 55.229603 -1186.541748
 v 979.250427 54.311420 -1188.248535
@@ -24125,8 +24125,8 @@ vn -0.0220 0.4473 -0.8941
 vn -0.0224 0.4030 -0.9149
 vn -0.0676 0.4030 -0.9127
 vn -0.1120 0.4030 -0.9083
-g Esfera_UV.001_Esfera_UV.001_Target_texture.001
-usemtl Target_texture.001
+# g Esfera_UV.001_Esfera_UV.001_Target_texture.001
+usemtl target
 s off
 f 3459/1/1 3460/2/1 3463/3/1 3462/4/1
 f 3460/2/2 3461/5/2 3464/6/2 3463/3/2
