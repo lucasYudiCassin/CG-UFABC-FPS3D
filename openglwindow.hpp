@@ -7,6 +7,7 @@
 #include "camera.hpp"
 #include "gamedata.hpp"
 #include "model.hpp"
+#include "targets.hpp"
 
 class OpenGLWindow : public abcg::OpenGLWindow {
  protected:
@@ -22,10 +23,11 @@ class OpenGLWindow : public abcg::OpenGLWindow {
   int m_viewportHeight{};
 
   GameData m_gameData;
+  Targets m_targets;
 
   Model m_pistolModel;
-  Model m_targetModel;
   Model m_roomModel;
+  Model m_targetModel;
 
   float m_targetXAxis = {0.0f};
   glm::vec3 m_targetPosition{0.0f};
@@ -63,6 +65,7 @@ class OpenGLWindow : public abcg::OpenGLWindow {
   void render(glm::mat4 modelMatrix, Model model);
 
   void restart();
+  void shoot();
 };
 
 #endif

@@ -1,11 +1,13 @@
 #include "openglwindow.hpp"
 
 #include <imgui.h>
+#include <math.h>
 
 #include <cppitertools/itertools.hpp>
 #include <glm/fwd.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
 
+#include "SDL_keycode.h"
 #include "camera.hpp"
 #include "core.h"
 
@@ -57,6 +59,9 @@ void OpenGLWindow::handleEvent(SDL_Event& event) {
   if (event.type == SDL_MOUSEBUTTONDOWN) {
     SDL_SetRelativeMouseMode(SDL_TRUE);
     m_relativeMouse = true;
+    if (m_relativeMouse) {
+      shoot();
+    }
   }
 
   if (event.type == SDL_MOUSEMOTION) {
@@ -80,18 +85,23 @@ void OpenGLWindow::initializeGL() {
                           getAssetsPath() + "maps/pistol_normal.jpg");
 
   m_targetModel.loadModel(m_program, getAssetsPath() + "target.obj",
-                          getAssetsPath() + "maps/room_difusse.jpg",
-                          getAssetsPath() + "maps/room_normal.jpg");
+                          getAssetsPath() + "maps/target_difusse.jpg",
+                          getAssetsPath() + "maps/target_normal.jpg");
 
   m_roomModel.loadModel(m_program, getAssetsPath() + "room.obj",
-                        getAssetsPath() + "maps/room_difusse_gloss.jpg",
+                        getAssetsPath() + "maps/room_difusse.jpg",
                         getAssetsPath() + "maps/room_normal.jpg");
 
   // Initialize camera
   m_camera.initializeCamera();
+
+  restart();
 }
 
-void OpenGLWindow::restart() { m_gameData.m_state = State::Playing; }
+void OpenGLWindow::restart() {
+  m_gameData.m_state = State::Playing;
+  m_targets.restart();
+}
 
 void OpenGLWindow::render(glm::mat4 modelMatrix, Model model) {
   const auto program{m_program};
@@ -159,13 +169,10 @@ void OpenGLWindow::paintGL() {
 
   // RENDER ROOM
   glm::mat4 modelMatrix{1.0f};
-  glm::mat4 roomModelMatrix{1.0f};
 
   // RENDER WEAPON
-  // glm::mat4 modelMatrix{1.0f};
-
   // Rotation angle
-  modelMatrix = glm::translate(modelMatrix, m_camera.m_eye);
+  modelMatrix = glm::translate(glm::mat4{1.0f}, m_camera.m_eye);
 
   auto forward = glm::normalize(m_camera.m_at - m_camera.m_eye);
 
@@ -174,17 +181,20 @@ void OpenGLWindow::paintGL() {
       0.4f * glm::normalize(m_camera.m_atBase - m_camera.m_eye);
 
   // Translate gun to right
-  translation += -0.1f * glm::cross(m_camera.m_up, forward);
+  translation += -0.15f * glm::cross(m_camera.m_up, forward);
 
   // Translate gun upward
-  translation += -0.1f * m_camera.m_up;
+  translation += glm::vec3{0.0f, -0.1f, 0.0f};
+
+  translation += 0.1f * forward;
 
   modelMatrix = glm::translate(modelMatrix, translation);
 
   modelMatrix = glm::scale(modelMatrix, glm::vec3(0.15f, 0.15f, 0.15f));
   // rotate weapon horizontally
   modelMatrix =
-      glm::rotate(modelMatrix, -70.0f + m_camera.m_gun_y_angle, m_camera.m_up);
+      glm::rotate(modelMatrix, -glm::radians(90.0f) + m_camera.m_gun_y_angle,
+                  m_camera.m_up);
 
   // rotate weapon vertically
   modelMatrix = glm::rotate(modelMatrix, 0.7f * m_camera.m_gun_z_angle,
@@ -192,29 +202,37 @@ void OpenGLWindow::paintGL() {
 
   render(modelMatrix, m_pistolModel);
 
-  // glm::mat4 modelMatrix{1.0f};
-  modelMatrix = glm::mat4{1.0f};
-  m_targetPosition = glm::vec3(0.0f, 0.0f, 0.5f);
-  modelMatrix = glm::translate(modelMatrix, m_targetPosition);
+  if (!m_targets.m_targets.empty()) {
+    for (auto target : m_targets.m_targets) {
+      auto translation = m_targets.allowedTranslations.at(target);
+      modelMatrix = glm::translate(glm::mat4{1.0f}, translation);
   modelMatrix = glm::scale(modelMatrix, glm::vec3{m_targetScale});
 
   render(modelMatrix, m_targetModel);
+    }
+  }
 
   // Rotation angle
-  const auto angle = glm::radians(-90.0f);
-  glm::mat4 scalingMatrix =
-      glm::scale(glm::mat4(1.0f), glm::vec3(2.0f, 1.0f, 2.0f));
-  glm::mat4 translateMatrix =
-      glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 1.7f));
-  glm::mat4 rotateMatrix =
-      glm::rotate(glm::mat4(1.0f), angle, {0.0f, 1.0f, 0.0f});
+  modelMatrix = glm::translate(glm::mat4{1.0f}, glm::vec3(0.0f, 0.0f, 1.7f));
+  modelMatrix = glm::scale(modelMatrix, glm::vec3(2.0f, 1.0f, 2.0f));
+  modelMatrix = glm::rotate(modelMatrix, -glm::radians(90.0f), m_camera.m_up);
 
-  roomModelMatrix = translateMatrix * rotateMatrix * scalingMatrix;
-
-  render(roomModelMatrix, m_roomModel);
+  render(modelMatrix, m_roomModel);
 }
 
-void OpenGLWindow::paintUI() { abcg::OpenGLWindow::paintUI(); }
+void OpenGLWindow::paintUI() {
+  ImGui::SetNextWindowPos(
+      ImVec2{(float)m_viewportWidth / 2, (float)m_viewportHeight / 2});
+  ImGui::SetNextWindowSize(
+      ImVec2{(float)m_viewportWidth, (float)m_viewportHeight});
+  ImGuiWindowFlags flags{
+      ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar |
+      ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoScrollbar};
+
+  ImGui::Begin("OpenGL Texture Text", nullptr, flags);
+  ImGui::TextColored(ImVec4(1, 0, 0, 1), "·");
+  ImGui::End();
+}
 
 void OpenGLWindow::resizeGL(int width, int height) {
   m_viewportWidth = width;
@@ -223,15 +241,7 @@ void OpenGLWindow::resizeGL(int width, int height) {
   m_camera.computeProjectionMatrix(width, height);
 }
 
-void OpenGLWindow::terminateGL() {
-  m_roomModel.terminateGL();
-  m_pistolModel.terminateGL();
-  m_targetModel.terminateGL();
-  // for (const auto& program : m_programs) {
-  //   abcg::glDeleteProgram(program);
-  // }
-  abcg::glDeleteProgram(m_program);
-}
+void OpenGLWindow::terminateGL() { abcg::glDeleteProgram(m_program); }
 
 void OpenGLWindow::update() {
   float deltaTime{static_cast<float>(getDeltaTime())};
@@ -243,15 +253,6 @@ void OpenGLWindow::update() {
   glm::vec2 rotationSpeed = getMouseRotationSpeed();
   m_camera.pan(rotationSpeed.x * deltaTime);
   m_camera.tilt(rotationSpeed.y * deltaTime);
-
-  auto atMinusCamera = m_camera.m_at - m_camera.m_eye;
-  auto distance = glm::distance(glm::cross(m_targetPosition - m_camera.m_eye,
-                                           m_targetPosition - m_camera.m_at),
-                                glm::vec3{0.0f}) /
-                  glm::distance(atMinusCamera, glm::vec3{0.0f});
-  // auto distance = glm::cross(m_targetPosition - m_camera.m_eye,
-  // m_targetPosition - m_camera.m_at) / atMinusCamera;
-  fmt::print("distance = {}", distance);
 }
 
 glm::vec2 OpenGLWindow::getMouseRotationSpeed() {
@@ -259,11 +260,43 @@ glm::vec2 OpenGLWindow::getMouseRotationSpeed() {
     SDL_WarpMouseInWindow(nullptr, m_viewportWidth / 2, m_viewportHeight / 2);
   }
 
-  float speedScale{2.0f};
+  float speedScale{1.0f};
 
   glm::vec2 mouseMovement{m_mouseMovement.x, -m_mouseMovement.y};
 
   m_mouseMovement = glm::vec2{0, 0};
 
   return glm::vec2{mouseMovement.x * speedScale, mouseMovement.y * speedScale};
+}
+
+void OpenGLWindow::shoot() {
+  if (m_targets.m_targets.empty()) {
+    return;
+  }
+  auto v = m_camera.m_at - m_camera.m_eye;
+  fmt::print("at = {} {} {} \n", m_camera.m_at.x, m_camera.m_at.y,
+             m_camera.m_at.z);
+  fmt::print("-----------------------------------\n");
+  fmt::print("eye = {} {} {}\n", m_camera.m_eye.x, m_camera.m_eye.y,
+             m_camera.m_eye.z);
+
+  fmt::print("-----------------------------------\n");
+
+  auto targets = m_targets.m_targets;
+
+  for (auto target : targets) {
+    auto targetTranslation = m_targets.allowedTranslations.at(target);
+
+    auto num = glm::cross(m_camera.m_eye - targetTranslation, v);
+
+    auto distance = sqrt((num.x * num.x) + (num.y * num.y) + (num.z * num.z)) /
+                    sqrt((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
+
+    // fmt::print("distance = {}\n", distance);
+
+    // TODO: Check correct distance
+    if (distance < 0.01) {
+      m_targets.removeTarget(target);
+    }
+  }
 }
