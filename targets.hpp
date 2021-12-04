@@ -8,6 +8,9 @@
 #include <list>
 #include <random>
 
+#include "abcg.hpp"
+#include "abcg_elapsedtimer.hpp"
+
 class OpenGLWindow;
 
 class Targets {
@@ -28,30 +31,28 @@ class Targets {
   double timeElapsed;
 
   struct Target {
-    double m_elapsedTime;
-    glm::vec3 m_translation;
-    bool m_hit{false};
-  } __attribute__((aligned(32)));
+    int m_position;
+  } __attribute__((aligned(4)));
 
-  std::list<Target> m_targets;
+  std::list<int> m_targets{};
 
-  std::array<glm::vec3, 9> allowedTranslations{
-      glm::vec3{0.0f, 0.3f, 0.3f}, glm::vec3{0.0f, 0.6f, 0.3f},
-      glm::vec3{0.0f, 0.9f, 0.3f}, glm::vec3{0.0f, 0.3f, 0.6f},
-      glm::vec3{0.0f, 0.6f, 0.6f}, glm::vec3{0.0f, 0.9f, 0.6f},
-      glm::vec3{0.0f, 0.3f, 0.9f}, glm::vec3{0.0f, 0.6f, 0.9f},
-      glm::vec3{0.0f, 0.9f, 0.9f},
+  const std::array<glm::vec3, 9> allowedTranslations{
+      glm::vec3{0.3f, 0.3f, 0.0f}, glm::vec3{0.3f, 0.6f, 0.0f},
+      glm::vec3{0.3f, 0.9f, 0.0f}, glm::vec3{0.6f, 0.3f, 0.0f},
+      glm::vec3{0.6f, 0.6f, 0.0f}, glm::vec3{0.6f, 0.9f, 0.0f},
+      glm::vec3{0.9f, 0.3f, 0.0f}, glm::vec3{0.9f, 0.6f, 0.0f},
+      glm::vec3{0.9f, 0.9f, 0.0f},
   };
 
-  
-
   std::default_random_engine m_randomEngine;
-  std::uniform_real_distribution<float> m_randomDist{-1.0f, 1.0f};
+  std::uniform_int_distribution<int> m_randomDist{0, 8};
 
-  void initializeTargets();
-  static Targets::Target createTargetEvent(double elapsedTime);
-  void targetAddedEvent(Targets::Target target);
-  static void targetHittedEvent(Targets::Target &target, double elapsedTime);
+  const int SIMULTANEOUS_TARGETS = 4;
+
+  void restart();
+  static Targets::Target createTargetEvent();
+  void addTarget();
+  void removeTarget(int position);
 };
 
 #endif
