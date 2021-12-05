@@ -11,7 +11,7 @@
 
 class OpenGLWindow : public abcg::OpenGLWindow {
  protected:
-  void handleEvent(SDL_Event& ev) override;
+  void handleEvent(SDL_Event &ev) override;
   void initializeGL() override;
   void paintGL() override;
   void paintUI() override;
@@ -35,8 +35,6 @@ class OpenGLWindow : public abcg::OpenGLWindow {
   float m_targetRadius{0.0897};
 
   Camera m_camera;
-  float m_dollySpeed{0.0f};
-  float m_truckSpeed{0.0f};
   glm::vec2 m_mouseMovement{0.0f};
   bool m_relativeMouse{true};
 
@@ -56,6 +54,12 @@ class OpenGLWindow : public abcg::OpenGLWindow {
   glm::vec4 m_Ks{};
   float m_shininess{};
 
+  // Audio
+  SDL_AudioDeviceID m_deviceId;
+  Uint8 *m_wavBuffer;
+  SDL_AudioSpec wavSpec;
+  Uint32 wavLength;
+
   void loadModel(std::string_view path);
   void update();
   glm::vec2 getMouseRotationSpeed();
@@ -63,6 +67,7 @@ class OpenGLWindow : public abcg::OpenGLWindow {
 
   void restart();
   void shoot();
+  void playSound();
 };
 
 #endif

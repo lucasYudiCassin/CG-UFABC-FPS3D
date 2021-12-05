@@ -7,6 +7,7 @@
 #include <cppitertools/itertools.hpp>
 #include <glm/fwd.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
+#include <iostream>
 
 #include "SDL_keycode.h"
 #include "camera.hpp"
@@ -74,6 +75,11 @@ void OpenGLWindow::initializeGL() {
   m_camera.initializeCamera();
 
   restart();
+
+  // Load sound
+  SDL_LoadWAV((getAssetsPath() + "sounds/gunshot_v1.wav").c_str(), &wavSpec,
+              &m_wavBuffer, &wavLength);
+  m_deviceId = SDL_OpenAudioDevice(nullptr, 0, &wavSpec, nullptr, 0);
 }
 
 void OpenGLWindow::restart() {
@@ -346,8 +352,20 @@ glm::vec2 OpenGLWindow::getMouseRotationSpeed() {
   return glm::vec2{mouseMovement.x * speedScale, mouseMovement.y * speedScale};
 }
 
+// based on https://gigi.nullneuron.net/gigilabs/playing-a-wav-file-using-sdl2/
+void OpenGLWindow::playSound() {
+  SDL_ClearQueuedAudio(m_deviceId);
+  if (SDL_QueueAudio(m_deviceId, m_wavBuffer, wavLength) < 0) {
+    fmt::print("Failed to play sound ({})\n", SDL_GetError());
+    return;
+  }
+  SDL_PauseAudioDevice(m_deviceId, 0);
+}
+
 void OpenGLWindow::shoot() {
   m_gameData.m_shots++;
+  playSound();
+
   if (m_targets.m_targets.empty()) {
     return;
   }
