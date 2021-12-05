@@ -324,7 +324,8 @@ void OpenGLWindow::paintUI() {
     }
 
     if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_UpArrow))) {
-      loadSound((currentSound + 1) % 2);
+      currentSound++;
+      loadSound(currentSound % 2);
     }
   }
 }
