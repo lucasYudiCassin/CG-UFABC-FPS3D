@@ -246,7 +246,8 @@ void OpenGLWindow::paintUI() {
                            ImGuiWindowFlags_NoInputs};
     ImGui::Begin(" ", nullptr, flags);
 
-    ImGui::Text("Time elapsed: %.f", m_gameTimer.elapsed());
+    ImGui::Text("Time remaining: %.f",
+                GAME_DURATION_SECONDS - m_gameTimer.elapsed());
     ImGui::End();
     flags = {ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar |
              ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoScrollbar};
@@ -276,14 +277,14 @@ void OpenGLWindow::paintUI() {
         ImVec2{(float)m_viewportWidth / 4, (float)m_viewportHeight / 4});
     ImGui::SetNextWindowSize(
         ImVec2{(float)m_viewportWidth / 2, (float)m_viewportHeight / 4});
-    ImGui::Begin("instruction", nullptr, ImGuiWindowFlags_NoDecoration);
+    ImGui::Begin("Instructions", nullptr, ImGuiWindowFlags_NoDecoration);
     {
-      ImGui::Text("Duration of the game: %d seconds", GAME_DURATION_SECONDS);
-      ImGui::Text("try to hit all targets in %d seconds",
-                  GAME_DURATION_SECONDS);
-      ImGui::Text("Press any mouse button to shot");
+      ImGui::Text("Game duration: %d seconds", GAME_DURATION_SECONDS);
+      ImGui::Text("Hit targets as many as you can.");
+      ImGui::Text("Move your mouse to aim.");
+      ImGui::Text("Press any mouse button to shoot.");
       ImGui::Spacing();
-      ImGui::Text("press space to start");
+      ImGui::Text("Press space to start.");
     }
     ImGui::End();
     if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_Space))) {
@@ -299,18 +300,18 @@ void OpenGLWindow::paintUI() {
     ImGui::Begin("Statistics", nullptr, ImGuiWindowFlags_NoDecoration);
     {
       ImGui::Text("Shots fired: %d", m_gameData.m_shots);
-      ImGui::Text("Targets hit: %d", m_gameData.m_score);
+      ImGui::Text("Targets hitted: %d", m_gameData.m_score);
       ImGui::Text("Accuracy: %.2f%%",
                   100 * static_cast<float>(m_gameData.m_score) /
                       static_cast<float>(m_gameData.m_shots));
       ImGui::Text(
-          "Targets hit per second: %.3f",
+          "Targets hitted per second: %.3f",
           static_cast<float>(m_gameData.m_score) / GAME_DURATION_SECONDS);
 
       ImGui::Spacing();
       ImGui::Spacing();
-      ImGui::Text("press space to restart");
-      ImGui::Text("press ESC to enable cursor");
+      ImGui::Text("Press space to restart");
+      ImGui::Text("Press ESC to enable cursor");
     }
     ImGui::End();
     if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_Escape))) {
