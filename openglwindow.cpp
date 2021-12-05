@@ -17,7 +17,7 @@ void OpenGLWindow::handleEvent(SDL_Event& event) {
   glm::ivec2 mousePosition;
   SDL_GetMouseState(&mousePosition.x, &mousePosition.y);
 
-  if (event.type == SDL_KEYUP) {
+  if (event.type == SDL_KEYDOWN) {
     if (event.key.keysym.sym == SDLK_ESCAPE) {
       if (m_gameData.m_state == State::GameOver) {
         SDL_SetRelativeMouseMode(SDL_FALSE);
@@ -75,14 +75,7 @@ void OpenGLWindow::initializeGL() {
   m_camera.initializeCamera();
 
   restart();
-
-  // Load sound
-  // Audio by: https://mixkit.co/free-sound-effects/gun/ (v1)
-  // https://www.videvo.net/sound-effect/gun-shot-single-shot-in-pe1097906/246309/
-  // (v2)
-  SDL_LoadWAV((getAssetsPath() + "sounds/gunshot_v2.wav").c_str(), &wavSpec,
-              &m_wavBuffer, &wavLength);
-  m_deviceId = SDL_OpenAudioDevice(nullptr, 0, &wavSpec, nullptr, 0);
+  loadSound(0);
 }
 
 void OpenGLWindow::restart() {
@@ -99,6 +92,25 @@ void OpenGLWindow::restart() {
   SDL_SetRelativeMouseMode(SDL_TRUE);
   SDL_ShowCursor(SDL_FALSE);
   m_relativeMouse = true;
+}
+
+void OpenGLWindow::loadSound(int option) {
+  // Load sound
+  // Audio by: https://mixkit.co/free-sound-effects/gun/ (v1)
+  // https://www.videvo.net/sound-effect/gun-shot-single-shot-in-pe1097906/246309/
+  // (v2)
+  SDL_CloseAudioDevice(m_deviceId);
+  SDL_FreeWAV(m_wavBuffer);
+  std::string path;
+  if (option == 1) {
+    path = "sounds/gunshot_v1.wav";
+  } else {
+    path = "sounds/gunshot_v2.wav";
+  }
+
+  SDL_LoadWAV((getAssetsPath() + path).c_str(), &wavSpec, &m_wavBuffer,
+              &wavLength);
+  m_deviceId = SDL_OpenAudioDevice(nullptr, 0, &wavSpec, nullptr, 0);
 }
 
 void OpenGLWindow::render(glm::mat4 modelMatrix, Model model) {
@@ -165,57 +177,61 @@ void OpenGLWindow::paintGL() {
   abcg::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   abcg::glViewport(0, 0, m_viewportWidth, m_viewportHeight);
 
-  // RENDER ROOM
   glm::mat4 modelMatrix{1.0f};
 
-  // RENDER WEAPON
-  // Rotation angle
-  modelMatrix = glm::translate(glm::mat4{1.0f}, m_camera.m_eye);
+  // Render PISTOL
+  if (showGun) {
+    modelMatrix = glm::translate(glm::mat4{1.0f}, m_camera.m_eye);
 
-  auto forward = glm::normalize(m_camera.m_at - m_camera.m_eye);
+    auto forward = glm::normalize(m_camera.m_at - m_camera.m_eye);
 
-  // Translate horizontally
-  glm::vec3 translation =
-      0.4f * glm::normalize(m_camera.m_atBase - m_camera.m_eye);
+    // Translate horizontally
+    glm::vec3 translation =
+        0.4f * glm::normalize(m_camera.m_atBase - m_camera.m_eye);
 
-  // Translate gun to right
-  translation += -0.15f * glm::cross(m_camera.m_up, forward);
+    // Translate gun to right
+    translation += -0.15f * glm::cross(m_camera.m_up, forward);
 
-  // Translate gun upward
-  translation += glm::vec3{0.0f, -0.1f, 0.0f};
+    // Translate gun upward
+    translation += glm::vec3{0.0f, -0.1f, 0.0f};
 
-  translation += 0.1f * forward;
+    translation += 0.1f * forward;
 
-  modelMatrix = glm::translate(modelMatrix, translation);
+    modelMatrix = glm::translate(modelMatrix, translation);
 
-  modelMatrix = glm::scale(modelMatrix, glm::vec3(0.15f, 0.15f, 0.15f));
-  // rotate weapon horizontally
-  modelMatrix =
-      glm::rotate(modelMatrix, -glm::radians(90.0f) + m_camera.m_gun_y_angle,
-                  m_camera.m_up);
+    modelMatrix = glm::scale(modelMatrix, glm::vec3(0.15f, 0.15f, 0.15f));
+    // rotate weapon horizontally
+    modelMatrix =
+        glm::rotate(modelMatrix, -glm::radians(90.0f) + m_camera.m_gun_y_angle,
+                    m_camera.m_up);
 
-  // rotate weapon vertically
-  modelMatrix = glm::rotate(modelMatrix, 0.7f * m_camera.m_gun_z_angle,
-                            glm::vec3{0.0f, 0.0f, 1.0f});
+    // rotate weapon vertically
+    modelMatrix = glm::rotate(modelMatrix, 0.7f * m_camera.m_gun_z_angle,
+                              glm::vec3{0.0f, 0.0f, 1.0f});
 
-  render(modelMatrix, m_pistolModel);
+    render(modelMatrix, m_pistolModel);
+  }
 
-  if (!m_targets.m_targets.empty()) {
-    for (auto target : m_targets.m_targets) {
-      auto translation = m_targets.allowedTranslations.at(target);
-      modelMatrix = glm::translate(glm::mat4{1.0f}, translation);
-      modelMatrix = glm::scale(modelMatrix, glm::vec3{m_targetScale});
+  // Render TARGETS
+  {
+    if (!m_targets.m_targets.empty()) {
+      for (auto target : m_targets.m_targets) {
+        auto translation = m_targets.allowedTranslations.at(target);
+        modelMatrix = glm::translate(glm::mat4{1.0f}, translation);
+        modelMatrix = glm::scale(modelMatrix, glm::vec3{m_targetScale});
 
-      render(modelMatrix, m_targetModel);
+        render(modelMatrix, m_targetModel);
+      }
     }
   }
 
-  // Rotation angle
-  modelMatrix = glm::translate(glm::mat4{1.0f}, glm::vec3(0.0f, 0.0f, 1.7f));
-  modelMatrix = glm::scale(modelMatrix, glm::vec3(2.0f, 1.0f, 2.0f));
-  modelMatrix = glm::rotate(modelMatrix, -glm::radians(90.0f), m_camera.m_up);
-
-  render(modelMatrix, m_roomModel);
+  // Render ROOM
+  {
+    modelMatrix = glm::translate(glm::mat4{1.0f}, glm::vec3(0.0f, 0.0f, 1.5f));
+    modelMatrix = glm::scale(modelMatrix, glm::vec3(2.0f, 1.0f, 3.0f));
+    modelMatrix = glm::rotate(modelMatrix, -glm::radians(90.0f), m_camera.m_up);
+    render(modelMatrix, m_roomModel);
+  }
 }
 
 void OpenGLWindow::paintUI() {
@@ -254,7 +270,6 @@ void OpenGLWindow::paintUI() {
     }
 
     ImGui::End();
-    return;
   }
   if (m_gameData.m_state == State::Initial) {
     ImGui::SetNextWindowPos(
@@ -275,7 +290,6 @@ void OpenGLWindow::paintUI() {
       m_gameData.m_state = State::Playing;
       m_gameTimer.restart();
     }
-    return;
   }
   if (m_gameData.m_state == State::GameOver) {
     ImGui::SetNextWindowPos(
@@ -309,7 +323,9 @@ void OpenGLWindow::paintUI() {
       restart();
     }
 
-    return;
+    if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_UpArrow))) {
+      loadSound((currentSound + 1) % 2);
+    }
   }
 }
 
@@ -323,6 +339,12 @@ void OpenGLWindow::resizeGL(int width, int height) {
 void OpenGLWindow::terminateGL() { abcg::glDeleteProgram(m_program); }
 
 void OpenGLWindow::update() {
+  if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_LeftArrow))) {
+    showGun = !showGun;
+  }
+  if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_RightArrow))) {
+    useSound = !useSound;
+  }
   if (m_gameData.m_state == State::GameOver ||
       m_gameData.m_state == State::Initial) {
     return;
@@ -367,8 +389,9 @@ void OpenGLWindow::playSound() {
 
 void OpenGLWindow::shoot() {
   m_gameData.m_shots++;
-  playSound();
-
+  if (useSound) {
+    playSound();
+  }
   if (m_targets.m_targets.empty()) {
     return;
   }

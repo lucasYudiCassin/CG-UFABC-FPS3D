@@ -68,6 +68,10 @@ class OpenGLWindow : public abcg::OpenGLWindow {
   void restart();
   void shoot();
   void playSound();
+  void loadSound(int option);
+  int currentSound{0};
+  bool showGun{true};
+  bool useSound{true};
 };
 
 #endif
