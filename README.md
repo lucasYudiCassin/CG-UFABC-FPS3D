@@ -1,4 +1,4 @@
-# CG-UFABC-FPS3D
+# Aim Trainer 3D
 
 Treine sua mira com o Aim Trainer 3D!
 
