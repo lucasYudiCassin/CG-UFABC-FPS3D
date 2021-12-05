@@ -257,8 +257,23 @@ void OpenGLWindow::paintUI() {
       ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar |
       ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoScrollbar};
 
-  ImGui::Begin("OpenGL Texture Text", nullptr, flags);
-  ImGui::TextColored(ImVec4(1, 0, 0, 1), "·");
+  ImGui::SetNextWindowSize(
+      ImVec2{(float)m_viewportWidth, (float)m_viewportHeight});
+  ImGui::Begin("Aim", nullptr, flags);
+  {
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    auto height = (float)m_viewportHeight / 2;
+    auto width = (float)m_viewportWidth / 2;
+
+    draw_list->AddLine(ImVec2{width - 1, height}, ImVec2{width - 5, height},
+                       ImColor(0.0f, 1.0f, 0.0f));
+    draw_list->AddLine(ImVec2{width + 1, height}, ImVec2{width + 5, height},
+                       ImColor(0.0f, 1.0f, 0.0f));
+    draw_list->AddLine(ImVec2{width, height - 1}, ImVec2{width, height - 5},
+                       ImColor(0.0f, 1.0f, 0.0f));
+    draw_list->AddLine(ImVec2{width, height + 1}, ImVec2{width, height + 5},
+                       ImColor(0.0f, 1.0f, 0.0f));
+  }
   ImGui::End();
 }
 
