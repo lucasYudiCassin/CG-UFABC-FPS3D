@@ -392,10 +392,7 @@ void OpenGLWindow::shoot() {
   if (useSound) {
     playSound();
   }
-  if (m_targets.m_targets.empty()) {
-    return;
-  }
-  if (m_camera.m_at.z >= 2.0f) {
+  if (m_targets.m_targets.empty() || m_camera.m_at.z >= 2.0f) {
     return;
   }
   auto v = m_camera.m_at - m_camera.m_eye;
