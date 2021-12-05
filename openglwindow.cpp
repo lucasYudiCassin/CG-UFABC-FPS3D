@@ -77,7 +77,10 @@ void OpenGLWindow::initializeGL() {
   restart();
 
   // Load sound
-  SDL_LoadWAV((getAssetsPath() + "sounds/gunshot_v1.wav").c_str(), &wavSpec,
+  // Audio by: https://mixkit.co/free-sound-effects/gun/ (v1)
+  // https://www.videvo.net/sound-effect/gun-shot-single-shot-in-pe1097906/246309/
+  // (v2)
+  SDL_LoadWAV((getAssetsPath() + "sounds/gunshot_v2.wav").c_str(), &wavSpec,
               &m_wavBuffer, &wavLength);
   m_deviceId = SDL_OpenAudioDevice(nullptr, 0, &wavSpec, nullptr, 0);
 }
