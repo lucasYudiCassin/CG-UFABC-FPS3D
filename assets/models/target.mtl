@@ -12,7 +12,7 @@ newmtl target
   Ks 0.4000 0.4000 0.4000
   Ke 0.0000 0.0000 0.0000
 
-  map_Ka maps/target_diffuse.jpg
-	map_Kd maps/target_diffuse.jpg
-	map_bump maps/target_normal.jpg
-	bump maps/target_normal.jpg
+  map_Ka ../maps/target_diffuse.jpg
+	map_Kd ../maps/target_diffuse.jpg
+	map_bump ../maps/target_normal.jpg
+	bump ../maps/target_normal.jpg

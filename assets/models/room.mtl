@@ -11,7 +11,7 @@ newmtl room
     Kd 0.800000 0.800000 0.800000
     Ks 0.300000 0.300000 0.300000
     Ke 0.000000 0.000000 0.000000
-	map_Ka maps/room_diffuse.jpg
-	map_Kd maps/room_diffuse.jpg
-	map_bump maps/room_normal.png
-	bump maps/room_normal.png
+	map_Ka ../maps/room_diffuse.jpg
+	map_Kd ../maps/room_diffuse.jpg
+	map_bump ../maps/room_normal.png
+	bump ../maps/room_normal.png

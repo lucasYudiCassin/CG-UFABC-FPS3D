@@ -8,7 +8,7 @@ newmtl pistol
   Kd 1.0000 1.0000 1.0000
   Ks 0.6000 0.6000 0.6000
   Ke 0.0000 0.0000 0.0000
-  map_Ka maps/pistol_diffuse.jpg
-  map_Kd maps/pistol_diffuse.jpg
-  map_bump maps/pistol_normal.jpg
-  bump maps/pistol_normal.jpg
+  map_Ka ../maps/pistol_diffuse.jpg
+  map_Kd ../maps/pistol_diffuse.jpg
+  map_bump ../maps/pistol_normal.jpg
+  bump ../maps/pistol_normal.jpg

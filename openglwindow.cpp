@@ -59,15 +59,15 @@ void OpenGLWindow::initializeGL() {
       createProgramFromFile(getAssetsPath() + "shaders/normalmapping.vert",
                             getAssetsPath() + "shaders/normalmapping.frag");
 
-  m_pistolModel.loadModel(m_program, getAssetsPath() + "pistol.obj",
+  m_pistolModel.loadModel(m_program, getAssetsPath() + "models/pistol.obj",
                           getAssetsPath() + "maps/pistol_difusse.jpg",
                           getAssetsPath() + "maps/pistol_normal.jpg");
 
-  m_targetModel.loadModel(m_program, getAssetsPath() + "target.obj",
+  m_targetModel.loadModel(m_program, getAssetsPath() + "models/target.obj",
                           getAssetsPath() + "maps/target_difusse.jpg",
                           getAssetsPath() + "maps/target_normal.jpg");
 
-  m_roomModel.loadModel(m_program, getAssetsPath() + "room.obj",
+  m_roomModel.loadModel(m_program, getAssetsPath() + "models/room.obj",
                         getAssetsPath() + "maps/room_difusse.jpg",
                         getAssetsPath() + "maps/room_normal.jpg");
 
