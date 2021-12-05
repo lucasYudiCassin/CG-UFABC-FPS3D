@@ -9,6 +9,6 @@ struct GameData {
   State m_state{State::Playing};
   int m_score{0};
   int m_shots{0};
-} __attribute__((aligned(4)));
+} __attribute__((aligned(16)));
 
 #endif
