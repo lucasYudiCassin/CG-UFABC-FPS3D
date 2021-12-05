@@ -29,8 +29,16 @@ void OpenGLWindow::handleEvent(SDL_Event& event) {
     //   m_truckSpeed = 0.6f;
 
     if (event.key.keysym.sym == SDLK_ESCAPE) {
+      if (m_gameData.m_state == State::GameOver) {
       SDL_SetRelativeMouseMode(SDL_FALSE);
       m_relativeMouse = false;
+    }
+    }
+
+    if (event.key.keysym.sym == SDLK_SPACE) {
+      if (m_gameData.m_state == State::GameOver) {
+        restart();
+      }
     }
   }
 
@@ -57,9 +65,7 @@ void OpenGLWindow::handleEvent(SDL_Event& event) {
   }
 
   if (event.type == SDL_MOUSEBUTTONDOWN) {
-    SDL_SetRelativeMouseMode(SDL_TRUE);
-    m_relativeMouse = true;
-    if (m_relativeMouse) {
+    if (m_gameData.m_state == State::Playing) {
       shoot();
     }
   }
@@ -100,7 +106,12 @@ void OpenGLWindow::initializeGL() {
 
 void OpenGLWindow::restart() {
   m_gameData.m_state = State::Playing;
+  m_gameData.m_score = 0;
+  m_gameData.m_shots = 0;
+  m_gameTimer.restart();
   m_targets.restart();
+  SDL_SetRelativeMouseMode(SDL_TRUE);
+  m_relativeMouse = true;
 }
 
 void OpenGLWindow::render(glm::mat4 modelMatrix, Model model) {
@@ -221,10 +232,27 @@ void OpenGLWindow::paintGL() {
 }
 
 void OpenGLWindow::paintUI() {
-  ImGui::SetNextWindowPos(
-      ImVec2{(float)m_viewportWidth / 2, (float)m_viewportHeight / 2});
+  if (m_gameData.m_state == State::GameOver) {
+    ImGui::SetNextWindowPos(ImVec2{0.0f, 0.0f});
   ImGui::SetNextWindowSize(
-      ImVec2{(float)m_viewportWidth, (float)m_viewportHeight});
+        ImVec2{(float)m_viewportWidth / 2, (float)m_viewportHeight / 3});
+    ImGui::Begin("Statistics", nullptr);
+    {
+      ImGui::Text("Score: %d", m_gameData.m_score);
+      ImGui::Text(
+          "Targets per second: %.3f",
+          static_cast<float>(m_gameData.m_score) / GAME_DURATION_SECONDS);
+      ImGui::Text("Accuracy: %.2f%%",
+                  100 * static_cast<float>(m_gameData.m_score) /
+                      static_cast<float>(m_gameData.m_shots));
+
+      ImGui::Text("Press spacebar to start");
+    }
+    ImGui::End();
+
+    return;
+  }
+
   ImGuiWindowFlags flags{
       ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar |
       ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoScrollbar};
@@ -244,6 +272,14 @@ void OpenGLWindow::resizeGL(int width, int height) {
 void OpenGLWindow::terminateGL() { abcg::glDeleteProgram(m_program); }
 
 void OpenGLWindow::update() {
+  if (m_gameData.m_state == State::GameOver) {
+    return;
+  }
+
+  if (m_gameTimer.elapsed() >= GAME_DURATION_SECONDS) {
+    m_gameData.m_state = State::GameOver;
+  }
+
   float deltaTime{static_cast<float>(getDeltaTime())};
 
   m_camera.dolly(m_dollySpeed * deltaTime);
@@ -270,33 +306,24 @@ glm::vec2 OpenGLWindow::getMouseRotationSpeed() {
 }
 
 void OpenGLWindow::shoot() {
+  m_gameData.m_shots++;
   if (m_targets.m_targets.empty()) {
     return;
   }
   auto v = m_camera.m_at - m_camera.m_eye;
-  fmt::print("at = {} {} {} \n", m_camera.m_at.x, m_camera.m_at.y,
-             m_camera.m_at.z);
-  fmt::print("-----------------------------------\n");
-  fmt::print("eye = {} {} {}\n", m_camera.m_eye.x, m_camera.m_eye.y,
-             m_camera.m_eye.z);
-
-  fmt::print("-----------------------------------\n");
-
   auto targets = m_targets.m_targets;
 
   for (auto target : targets) {
     auto targetTranslation = m_targets.allowedTranslations.at(target);
-
     auto num = glm::cross(m_camera.m_eye - targetTranslation, v);
-
     auto distance = sqrt((num.x * num.x) + (num.y * num.y) + (num.z * num.z)) /
                     sqrt((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
 
-    // fmt::print("distance = {}\n", distance);
-
     // TODO: Check correct distance
-    if (distance < 0.01) {
+    if (distance < 0.095) {
+      m_gameData.m_score++;
       m_targets.removeTarget(target);
+      break;
     }
   }
 }

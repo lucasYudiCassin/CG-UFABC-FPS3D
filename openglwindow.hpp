@@ -40,7 +40,6 @@ class OpenGLWindow : public abcg::OpenGLWindow {
   float m_truckSpeed{0.0f};
   glm::vec2 m_mouseMovement{0.0f};
   bool m_relativeMouse{true};
-  abcg::ElapsedTimer m_mouseTimer{};
 
   // Shaders
   GLuint m_program{};
@@ -48,6 +47,9 @@ class OpenGLWindow : public abcg::OpenGLWindow {
   // Mapping mode
   // 0: triplanar; 1: cylindrical; 2: spherical; 3: from mesh
   // int m_mappingMode{};
+
+  abcg::ElapsedTimer m_gameTimer{};
+  static const int GAME_DURATION_SECONDS = 30;
 
   // Light and material properties
   glm::vec4 m_lightDir{-1.0f, -1.0f, -1.0f, 0.0f};
