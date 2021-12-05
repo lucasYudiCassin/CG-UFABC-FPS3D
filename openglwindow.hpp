@@ -29,8 +29,6 @@ class OpenGLWindow : public abcg::OpenGLWindow {
   Model m_roomModel;
   Model m_targetModel;
 
-  float m_targetXAxis = {0.0f};
-  glm::vec3 m_targetPosition{0.0f};
   float m_targetScale{0.15f};
   float m_targetRadius{0.0897};
 
