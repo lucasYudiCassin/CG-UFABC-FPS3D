@@ -62,68 +62,6 @@ vec4 BlinnPhong(vec3 N, vec3 L, vec3 V, vec2 texCoord) {
   return ambientColor + diffuseColor + specularColor;
 }
 
-// // Planar mapping
-// vec2 PlanarMappingXUV(vec3 P) { return vec2(1.0 - P.z, P.y); }
-// mat3 PlanarMappingXTBN(vec3 P) {
-//   vec3 T = vec3(0, 0, -1);
-//   vec3 N = fragNObj;
-//   vec3 B = cross(N, T);
-//   return ComputeTBN(T, B, N);
-// }
-
-// vec2 PlanarMappingYUV(vec3 P) { return vec2(P.x, 1.0 - P.z); }
-// mat3 PlanarMappingYTBN(vec3 P) {
-//   vec3 T = vec3(1, 0, 0);
-//   vec3 N = fragNObj;
-//   vec3 B = cross(N, T);
-//   return ComputeTBN(T, B, N);
-// }
-
-// vec2 PlanarMappingZUV(vec3 P) { return P.xy; }
-// mat3 PlanarMappingZTBN(vec3 P) {
-//   vec3 T = vec3(1, 0, 0);
-//   vec3 N = fragNObj;
-//   vec3 B = cross(N, T);
-//   return ComputeTBN(T, B, N);
-// }
-
-// #define PI 3.14159265358979323846
-
-// // Cylindrical mapping
-// vec2 CylindricalUV(vec3 P) {
-//   float longitude = atan(P.x, P.z);
-//   float height = P.y;
-
-//   float u = longitude / (2.0 * PI) + 0.5;  // From [-pi, pi] to [0, 1]
-//   float v = height - 0.5;                  // Base at y = -0.5
-
-//   return vec2(u, v);
-// }
-
-// mat3 CylindricalTBN(vec3 P) {
-//   vec3 T = vec3(P.z, 0, -P.x);
-//   vec3 N = fragNObj;
-//   vec3 B = cross(N, T);
-//   return ComputeTBN(T, B, N);
-// }
-
-// // Spherical mapping
-// vec2 SphericalUV(vec3 P) {
-//   float longitude = atan(P.x, P.z);
-//   float latitude = asin(P.y / length(P));
-
-//   float u = longitude / (2.0 * PI) + 0.5;  // From [-pi, pi] to [0, 1]
-//   float v = latitude / PI + 0.5;           // From [-pi/2, pi/2] to [0, 1]
-
-//   return vec2(u, v);
-// }
-
-// mat3 SphericalTBN(vec3 P) {
-//   vec3 T = vec3(P.z, 0, -P.x);
-//   vec3 N = fragNObj;
-//   vec3 B = cross(N, T);
-//   return ComputeTBN(T, B, N);
-// }
 
 void main() {
   vec4 color;
@@ -140,10 +78,5 @@ void main() {
   color = BlinnPhong(NTan, LTan, VTan, texCoord);
 
   outColor = color;
-  // if (gl_FrontFacing) {
-  //   outColor = color;
-  // } else {
-  //   float i = (color.r + color.g + color.b) / 3.0;
-  //   outColor = vec4(i, 0, 0, 1.0);
-  // }
+  
 }

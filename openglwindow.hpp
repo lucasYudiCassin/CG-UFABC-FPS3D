@@ -32,8 +32,7 @@ class OpenGLWindow : public abcg::OpenGLWindow {
   float m_targetXAxis = {0.0f};
   glm::vec3 m_targetPosition{0.0f};
   float m_targetScale{0.15f};
-  float m_targetOriginalRadius{10.0f};
-  float m_targetRadius{m_targetScale * m_targetOriginalRadius};
+  float m_targetRadius{0.0897};
 
   Camera m_camera;
   float m_dollySpeed{0.0f};
@@ -43,10 +42,6 @@ class OpenGLWindow : public abcg::OpenGLWindow {
 
   // Shaders
   GLuint m_program{};
-
-  // Mapping mode
-  // 0: triplanar; 1: cylindrical; 2: spherical; 3: from mesh
-  // int m_mappingMode{};
 
   abcg::ElapsedTimer m_gameTimer{};
   static const int GAME_DURATION_SECONDS = 30;

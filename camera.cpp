@@ -17,35 +17,6 @@ void Camera::computeViewMatrix() {
   m_viewMatrix = glm::lookAt(m_eye, m_at, m_up);
 }
 
-void Camera::dolly(float speed) {
-  if (speed == 0) return;
-  // Compute forward vector (view direction)
-  glm::vec3 forward = glm::normalize(m_atBase - m_eye);
-
-  // Move eye and center forward (speed > 0) or backward (speed < 0)
-  m_eye += forward * speed;
-  m_at += forward * speed;
-  m_atBase += forward * speed;
-
-  computeViewMatrix();
-}
-
-void Camera::truck(float speed) {
-  if (speed == 0) return;
-
-  // Compute forward vector (view direction)
-  glm::vec3 forward = glm::normalize(m_atBase - m_eye);
-  // Compute vector to the left
-  glm::vec3 left = glm::cross(m_up, forward);
-
-  // Move eye and center to the left (speed < 0) or to the right (speed > 0)
-  m_eye -= left * speed;
-  m_at -= left * speed;
-  m_atBase -= left * speed;
-
-  computeViewMatrix();
-}
-
 void Camera::pan(float speed) {
   if (speed == 0) return;
   glm::mat4 transform{glm::mat4(1.0f)};

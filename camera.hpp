@@ -13,8 +13,6 @@ class Camera {
   void computeViewMatrix();
   void computeProjectionMatrix(int width, int height);
 
-  void dolly(float speed);
-  void truck(float speed);
   void pan(float speed);
   void tilt(float speed);
 

@@ -1,5 +1,6 @@
 #include "openglwindow.hpp"
 
+#include <fmt/core.h>
 #include <imgui.h>
 #include <math.h>
 
@@ -15,53 +16,24 @@ void OpenGLWindow::handleEvent(SDL_Event& event) {
   glm::ivec2 mousePosition;
   SDL_GetMouseState(&mousePosition.x, &mousePosition.y);
 
-  if (event.type == SDL_KEYDOWN) {
-    // if (event.key.keysym.sym == SDLK_UP || event.key.keysym.sym == SDLK_w)
-    //   m_dollySpeed = 0.6f;
-
-    // if (event.key.keysym.sym == SDLK_DOWN || event.key.keysym.sym == SDLK_s)
-    //   m_dollySpeed = -0.6f;
-
-    // if (event.key.keysym.sym == SDLK_LEFT || event.key.keysym.sym == SDLK_a)
-    //   m_truckSpeed = -0.6f;
-
-    // if (event.key.keysym.sym == SDLK_RIGHT || event.key.keysym.sym == SDLK_d)
-    //   m_truckSpeed = 0.6f;
-
+  if (event.type == SDL_KEYUP) {
     if (event.key.keysym.sym == SDLK_ESCAPE) {
       if (m_gameData.m_state == State::GameOver) {
-      SDL_SetRelativeMouseMode(SDL_FALSE);
-      m_relativeMouse = false;
-    }
+        SDL_SetRelativeMouseMode(SDL_FALSE);
+        SDL_ShowCursor(SDL_TRUE);
+        m_relativeMouse = false;
+      }
     }
 
     if (event.key.keysym.sym == SDLK_SPACE) {
       if (m_gameData.m_state == State::GameOver) {
         restart();
       }
+      if (m_gameData.m_state == State::Initial) {
+        m_gameData.m_state = State::Playing;
+        m_gameTimer.restart();
+      }
     }
-  }
-
-  if (event.type == SDL_KEYUP) {
-    // if ((event.key.keysym.sym == SDLK_UP || event.key.keysym.sym == SDLK_w)
-    // &&
-    //     m_dollySpeed > 0)
-    //   m_dollySpeed = 0.0f;
-
-    // if ((event.key.keysym.sym == SDLK_DOWN || event.key.keysym.sym == SDLK_s)
-    // &&
-    //     m_dollySpeed < 0)
-    //   m_dollySpeed = 0.0f;
-
-    // if ((event.key.keysym.sym == SDLK_LEFT || event.key.keysym.sym == SDLK_a)
-    // &&
-    //     m_truckSpeed < 0)
-    //   m_truckSpeed = 0.0f;
-
-    // if ((event.key.keysym.sym == SDLK_RIGHT ||
-    //      event.key.keysym.sym == SDLK_d) &&
-    //     m_truckSpeed > 0)
-    //   m_truckSpeed = 0.0f;
   }
 
   if (event.type == SDL_MOUSEBUTTONDOWN) {
@@ -105,12 +77,18 @@ void OpenGLWindow::initializeGL() {
 }
 
 void OpenGLWindow::restart() {
-  m_gameData.m_state = State::Playing;
+  if (m_gameData.m_state == State::GameOver) {
+    m_gameData.m_state = State::Playing;
+    m_gameTimer.restart();
+  } else {
+    m_gameData.m_state = State::Initial;
+  }
+
   m_gameData.m_score = 0;
   m_gameData.m_shots = 0;
-  m_gameTimer.restart();
   m_targets.restart();
   SDL_SetRelativeMouseMode(SDL_TRUE);
+  SDL_ShowCursor(SDL_FALSE);
   m_relativeMouse = true;
 }
 
@@ -217,9 +195,9 @@ void OpenGLWindow::paintGL() {
     for (auto target : m_targets.m_targets) {
       auto translation = m_targets.allowedTranslations.at(target);
       modelMatrix = glm::translate(glm::mat4{1.0f}, translation);
-  modelMatrix = glm::scale(modelMatrix, glm::vec3{m_targetScale});
+      modelMatrix = glm::scale(modelMatrix, glm::vec3{m_targetScale});
 
-  render(modelMatrix, m_targetModel);
+      render(modelMatrix, m_targetModel);
     }
   }
 
@@ -232,49 +210,98 @@ void OpenGLWindow::paintGL() {
 }
 
 void OpenGLWindow::paintUI() {
-  if (m_gameData.m_state == State::GameOver) {
-    ImGui::SetNextWindowPos(ImVec2{0.0f, 0.0f});
-  ImGui::SetNextWindowSize(
-        ImVec2{(float)m_viewportWidth / 2, (float)m_viewportHeight / 3});
-    ImGui::Begin("Statistics", nullptr);
+  if (m_gameData.m_state == State::Playing) {
+    const auto size{ImVec2(300, 85)};
+    // const auto position{ImVec2((1 - size.x), (1 - size.y))};
+    const auto position{ImVec2(0, 0)};
+    ImGui::SetNextWindowPos(position);
+    ImGui::SetNextWindowSize(size);
+    ImGuiWindowFlags flags{ImGuiWindowFlags_NoBackground |
+                           ImGuiWindowFlags_NoTitleBar |
+                           ImGuiWindowFlags_NoInputs};
+    ImGui::Begin(" ", nullptr, flags);
+
+    ImGui::Text("Time elapsed: %.f", m_gameTimer.elapsed());
+    ImGui::End();
+    flags = {ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar |
+             ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoScrollbar};
+
+    ImGui::SetNextWindowSize(
+        ImVec2{(float)m_viewportWidth, (float)m_viewportHeight});
+    ImGui::Begin("Aim", nullptr, flags);
     {
-      ImGui::Text("Score: %d", m_gameData.m_score);
-      ImGui::Text(
-          "Targets per second: %.3f",
-          static_cast<float>(m_gameData.m_score) / GAME_DURATION_SECONDS);
+      ImDrawList* draw_list = ImGui::GetWindowDrawList();
+      auto height = (float)m_viewportHeight / 2;
+      auto width = (float)m_viewportWidth / 2;
+
+      draw_list->AddLine(ImVec2{width - 1, height}, ImVec2{width - 5, height},
+                         ImColor(0.0f, 1.0f, 0.0f));
+      draw_list->AddLine(ImVec2{width + 1, height}, ImVec2{width + 5, height},
+                         ImColor(0.0f, 1.0f, 0.0f));
+      draw_list->AddLine(ImVec2{width, height - 1}, ImVec2{width, height - 5},
+                         ImColor(0.0f, 1.0f, 0.0f));
+      draw_list->AddLine(ImVec2{width, height + 1}, ImVec2{width, height + 5},
+                         ImColor(0.0f, 1.0f, 0.0f));
+    }
+
+    ImGui::End();
+    return;
+  }
+  if (m_gameData.m_state == State::Initial) {
+    ImGui::SetNextWindowPos(
+        ImVec2{(float)m_viewportWidth / 4, (float)m_viewportHeight / 4});
+    ImGui::SetNextWindowSize(
+        ImVec2{(float)m_viewportWidth / 2, (float)m_viewportHeight / 4});
+    ImGui::Begin("instruction", nullptr, ImGuiWindowFlags_NoDecoration);
+    {
+      ImGui::Text("Duration of the game: %d seconds", GAME_DURATION_SECONDS);
+      ImGui::Text("try to hit all targets in %d seconds",
+                  GAME_DURATION_SECONDS);
+      ImGui::Text("Press any mouse button to shot");
+      ImGui::Spacing();
+      ImGui::Text("press space to start");
+    }
+    ImGui::End();
+    if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_Space))) {
+      m_gameData.m_state = State::Playing;
+      m_gameTimer.restart();
+    }
+    return;
+  }
+  if (m_gameData.m_state == State::GameOver) {
+    ImGui::SetNextWindowPos(
+        ImVec2{(float)m_viewportWidth / 4, (float)m_viewportHeight / 4});
+    ImGui::SetNextWindowSize(
+        ImVec2{(float)m_viewportWidth / 2, (float)m_viewportHeight / 4});
+    ImGui::Begin("Statistics", nullptr, ImGuiWindowFlags_NoDecoration);
+    {
+      ImGui::Text("Shots fired: %d", m_gameData.m_shots);
+      ImGui::Text("Targets hit: %d", m_gameData.m_score);
       ImGui::Text("Accuracy: %.2f%%",
                   100 * static_cast<float>(m_gameData.m_score) /
                       static_cast<float>(m_gameData.m_shots));
+      ImGui::Text(
+          "Targets hit per second: %.3f",
+          static_cast<float>(m_gameData.m_score) / GAME_DURATION_SECONDS);
 
-      ImGui::Text("Press spacebar to start");
+      ImGui::Spacing();
+      ImGui::Spacing();
+      ImGui::Text("press space to restart");
+      ImGui::Text("press ESC to enable cursor");
     }
     ImGui::End();
+    if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_Escape))) {
+      SDL_SetRelativeMouseMode(SDL_FALSE);
+      SDL_ShowCursor(SDL_TRUE);
+      m_relativeMouse = false;
+    }
+
+    if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_Space))) {
+      restart();
+    }
 
     return;
   }
-
-  ImGuiWindowFlags flags{
-      ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar |
-      ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoScrollbar};
-
-  ImGui::SetNextWindowSize(
-      ImVec2{(float)m_viewportWidth, (float)m_viewportHeight});
-  ImGui::Begin("Aim", nullptr, flags);
-  {
-    ImDrawList* draw_list = ImGui::GetWindowDrawList();
-    auto height = (float)m_viewportHeight / 2;
-    auto width = (float)m_viewportWidth / 2;
-
-    draw_list->AddLine(ImVec2{width - 1, height}, ImVec2{width - 5, height},
-                       ImColor(0.0f, 1.0f, 0.0f));
-    draw_list->AddLine(ImVec2{width + 1, height}, ImVec2{width + 5, height},
-                       ImColor(0.0f, 1.0f, 0.0f));
-    draw_list->AddLine(ImVec2{width, height - 1}, ImVec2{width, height - 5},
-                       ImColor(0.0f, 1.0f, 0.0f));
-    draw_list->AddLine(ImVec2{width, height + 1}, ImVec2{width, height + 5},
-                       ImColor(0.0f, 1.0f, 0.0f));
-  }
-  ImGui::End();
 }
 
 void OpenGLWindow::resizeGL(int width, int height) {
@@ -287,18 +314,17 @@ void OpenGLWindow::resizeGL(int width, int height) {
 void OpenGLWindow::terminateGL() { abcg::glDeleteProgram(m_program); }
 
 void OpenGLWindow::update() {
-  if (m_gameData.m_state == State::GameOver) {
+  if (m_gameData.m_state == State::GameOver ||
+      m_gameData.m_state == State::Initial) {
     return;
   }
 
-  if (m_gameTimer.elapsed() >= GAME_DURATION_SECONDS) {
+  if (m_gameTimer.elapsed() > GAME_DURATION_SECONDS) {
     m_gameData.m_state = State::GameOver;
+    return;
   }
 
   float deltaTime{static_cast<float>(getDeltaTime())};
-
-  m_camera.dolly(m_dollySpeed * deltaTime);
-  m_camera.truck(m_truckSpeed * deltaTime);
 
   if (m_mouseMovement.x == 0 && m_mouseMovement.y == 0) return;
   glm::vec2 rotationSpeed = getMouseRotationSpeed();
@@ -311,7 +337,7 @@ glm::vec2 OpenGLWindow::getMouseRotationSpeed() {
     SDL_WarpMouseInWindow(nullptr, m_viewportWidth / 2, m_viewportHeight / 2);
   }
 
-  float speedScale{1.0f};
+  float speedScale{0.6f};
 
   glm::vec2 mouseMovement{m_mouseMovement.x, -m_mouseMovement.y};
 
@@ -325,6 +351,9 @@ void OpenGLWindow::shoot() {
   if (m_targets.m_targets.empty()) {
     return;
   }
+  if (m_camera.m_at.z >= 2.0f) {
+    return;
+  }
   auto v = m_camera.m_at - m_camera.m_eye;
   auto targets = m_targets.m_targets;
 
@@ -334,8 +363,7 @@ void OpenGLWindow::shoot() {
     auto distance = sqrt((num.x * num.x) + (num.y * num.y) + (num.z * num.z)) /
                     sqrt((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
 
-    // TODO: Check correct distance
-    if (distance < 0.095) {
+    if (distance < m_targetRadius) {
       m_gameData.m_score++;
       m_targets.removeTarget(target);
       break;
